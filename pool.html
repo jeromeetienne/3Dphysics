@@ -137,9 +137,9 @@
 				projector = new THREE.Projector();
 
 				camera = new THREE.Camera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.z = 5;
-				camera.position.x = 10;
-				camera.position.y = 10;
+				camera.position.z = 100;
+				//camera.position.x = 50;
+				camera.position.y = 50;
 
 				scene = new THREE.Scene();
 
@@ -149,69 +149,102 @@
 				//ground.position.x = 0;
 				//ground.position.y = -10;
 				//ground.position.z = 0;
-				//scene.addObject( ground );				
+				//scene.addObject( ground );
 				
-				for ( var i = 0; i < 20; i ++ ) {
+				var addCube	= function(x, y, z, width, height, depth){
+					var geometry	= new THREE.CubeGeometry( width, height, depth );
+					var mesh	= new THREE.Mesh( geometry, material );
+
+					mesh.matrixAutoUpdate = false;
+					mesh.overdraw	= true;					
+					
+					mesh.position.x = x;
+					mesh.position.y = y;
+					mesh.position.z = z;
+
+					scene.addObject( mesh );
+	
+					var cube = new jiglib.JBox( null, width, depth, height );
+					cube.set_mass( width * height * depth );
+					cube.moveTo( new Vector3D( mesh.position.x, mesh.position.y, mesh.position.z, 0 ) );
+					system.addBody( cube );		
+
+					mesh.rigidBody = cube;
+					
+					return mesh;
+				}
+				var addSphere	= function(radius){
+					var geometry = new THREE.SphereGeometry( radius, 30, 30 );
+					var mesh = new THREE.Mesh( geometry, material );
+
+					mesh.matrixAutoUpdate = false;
+					//mesh.overdraw = true;					
+					
+					mesh.position.x = Math.random() * 10 - 5;
+					mesh.position.y = 6 + 6 * i;
+					mesh.position.z = Math.random() * 10 - 5;
+
+					scene.addObject( mesh );
+	
+					var sphere = new jiglib.JSphere( null, radius );
+					sphere.set_mass( 4 / 3 * Math.PI * Math.pow( radius, 3 ) );
+					sphere.set_mass( 4 / 3 * Math.PI * Math.pow( radius, 3 ) / 100 );
+					sphere.moveTo( new Vector3D( mesh.position.x, mesh.position.y, mesh.position.z, 0 ) );
+					system.addBody( sphere );
+					
+					mesh.rigidBody = sphere;
+					
+					return mesh;
+				}
+				
+				for ( var i = 0; i < 40; i ++ ) {
 
 					if (Math.random() > .5 && false ) {
 
-						var width = Math.random() * 4;
-						var height = Math.random() * 4;
-						var depth = Math.random() * 4;
-					
-						var geometry = new Cube( width, height, depth );
-						var mesh = new THREE.Mesh( geometry, material );
-	
-						mesh.matrixAutoUpdate = false;
-						mesh.overdraw = true;					
+						var width	= Math.random() * 4;
+						var height	= Math.random() * 4;
+						var depth	= Math.random() * 4;
+						var x		= Math.random() * 10 - 5;
+						var y		= 6 + 6 * i;
+						var z		= Math.random() * 10 - 5;
 						
-						mesh.position.x = Math.random() * 10 - 5;
-						mesh.position.y = 6 + 6 * i;
-						mesh.position.z = Math.random() * 10 - 5;
-	
-						scene.addObject( mesh );
-		
-						var cube = new jiglib.JBox( null, width, depth, height );
-						cube.set_mass( width * height * depth );
-						cube.moveTo( new Vector3D( mesh.position.x, mesh.position.y, mesh.position.z, 0 ) );
-						system.addBody( cube );		
-
-						mesh.rigidBody = cube;
+						addCube(x, y, z, width, height, depth);
 
 					} else {
 						
 						var radius = Math.random() * 4 / 2;
 						
 						var radius = 2;
-					
-						var geometry = new THREE.SphereGeometry( radius, 30, 30 );
-						var mesh = new THREE.Mesh( geometry, material );
-	
-						mesh.matrixAutoUpdate = false;
-						//mesh.overdraw = true;					
-						
-						mesh.position.x = Math.random() * 10 - 5;
-						mesh.position.y = 6 + 6 * i;
-						mesh.position.z = Math.random() * 10 - 5;
-	
-						scene.addObject( mesh );
-		
-						var sphere = new jiglib.JSphere( null, radius );
-						sphere.set_mass( 4 / 3 * Math.PI * Math.pow( radius, 3 ) );
-						sphere.set_mass( 4 / 3 * Math.PI * Math.pow( radius, 3 ) / 100 );
-						sphere.moveTo( new Vector3D( mesh.position.x, mesh.position.y, mesh.position.z, 0 ) );
-						system.addBody( sphere );
-						
-						mesh.rigidBody = sphere;
+
+						addSphere( radius );
 												
 					}
 
 				}
 
-				var plane	= new THREE.Mesh( new THREE.PlaneGeometry( 100, 100, 20, 20 ), new THREE.MeshBasicMaterial( { color: 0x555555, wireframe: true } ) );
+				var planeW	= 100;
+				var planeD	= 100;
+				var planeY	= -10;
+				var tileW	= 5;
+				
+				var plane	= new THREE.Mesh(
+					new THREE.PlaneGeometry( planeW, planeD, planeW/tileW, planeD/tileW ),
+					new THREE.MeshBasicMaterial( { color: 0x555555, wireframe: true } )
+				);
 				plane.rotation.x = - 90 * Math.PI / 180;
-				plane.position.y = - 10;
+				plane.position.y = planeY;
 				scene.addObject( plane );
+				
+				var mesh	= addCube(0, planeY+tileW/2, +(planeD/2 - tileW/2), planeW, tileW, tileW);
+				mesh.rigidBody.set_movable(false);
+				var mesh	= addCube(0, planeY+tileW/2, -(planeD/2 - tileW/2), planeW, tileW, tileW);
+				mesh.rigidBody.set_movable(false);
+
+				var mesh	= addCube( +(planeD/2 - tileW/2), planeY+tileW/2, 0, tileW, tileW, planeD - 2*tileW);
+				mesh.rigidBody.set_movable(false);
+				var mesh	= addCube( -(planeD/2 - tileW/2), planeY+tileW/2, 0, tileW, tileW, planeD - 2*tileW);
+				mesh.rigidBody.set_movable(false);
+				
 				
 				var width = 4;
 				var height = 1;
