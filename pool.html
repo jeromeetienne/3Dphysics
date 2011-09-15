@@ -15,6 +15,7 @@
 
 		<script type="text/javascript" src="Three.js"></script>	
 		<script type="text/javascript" src="RequestAnimationFrame.js"></script>
+		<script type="text/javascript" src="THREEx.jiglib.js"></script>
 
 
 <!-- TODO put all those library into a single js -->
@@ -164,12 +165,7 @@
 
 					scene.addObject( mesh );
 	
-					var cube = new jiglib.JBox( null, width, depth, height );
-					cube.set_mass( width * height * depth );
-					cube.moveTo( new Vector3D( mesh.position.x, mesh.position.y, mesh.position.z, 0 ) );
-					system.addBody( cube );		
-
-					mesh.rigidBody = cube;
+					THREEx.jiglib.addMesh(system, mesh);
 					
 					return mesh;
 				}
@@ -186,20 +182,14 @@
 
 					scene.addObject( mesh );
 	
-					var sphere = new jiglib.JSphere( null, radius );
-					sphere.set_mass( 4 / 3 * Math.PI * Math.pow( radius, 3 ) );
-					sphere.set_mass( 4 / 3 * Math.PI * Math.pow( radius, 3 ) / 100 );
-					sphere.moveTo( new Vector3D( mesh.position.x, mesh.position.y, mesh.position.z, 0 ) );
-					system.addBody( sphere );
-					
-					mesh.rigidBody = sphere;
+					THREEx.jiglib.addMesh(system, mesh);
 					
 					return mesh;
 				}
 				
 				for ( var i = 0; i < 40; i ++ ) {
 
-					if (Math.random() > .5 && false ) {
+					if (Math.random() > .5 ) {
 
 						var width	= Math.random() * 4;
 						var height	= Math.random() * 4;
@@ -212,17 +202,13 @@
 
 					} else {
 						
-						var radius = Math.random() * 4 / 2;
-						
-						var radius = 2;
-
-						addSphere( radius );
+						var mesh	= addSphere( 2 );
 												
 					}
 
 				}
 
-				var planeW	= 100;
+				var planeW	= 150;
 				var planeD	= 100;
 				var planeY	= -10;
 				var tileW	= 5;
@@ -234,15 +220,26 @@
 				plane.rotation.x = - 90 * Math.PI / 180;
 				plane.position.y = planeY;
 				scene.addObject( plane );
+
+				if( false ){
+					THREEx.jiglib.addMesh(system, plane);					
+				}else{
+					var body = new jiglib.JPlane();
+					body.set_y(-10);
+					body.set_rotationX(90);
+					body.set_movable(false);				
+					system.addBody( body );					
+				}
+
 				
 				var mesh	= addCube(0, planeY+tileW/2, +(planeD/2 - tileW/2), planeW, tileW, tileW);
 				mesh.rigidBody.set_movable(false);
 				var mesh	= addCube(0, planeY+tileW/2, -(planeD/2 - tileW/2), planeW, tileW, tileW);
 				mesh.rigidBody.set_movable(false);
 
-				var mesh	= addCube( +(planeD/2 - tileW/2), planeY+tileW/2, 0, tileW, tileW, planeD - 2*tileW);
+				var mesh	= addCube( +(planeW/2 - tileW/2), planeY+tileW/2, 0, tileW, tileW, planeD - 2*tileW);
 				mesh.rigidBody.set_movable(false);
-				var mesh	= addCube( -(planeD/2 - tileW/2), planeY+tileW/2, 0, tileW, tileW, planeD - 2*tileW);
+				var mesh	= addCube( -(planeW/2 - tileW/2), planeY+tileW/2, 0, tileW, tileW, planeD - 2*tileW);
 				mesh.rigidBody.set_movable(false);
 				
 				
@@ -387,13 +384,8 @@
 				// system.setSolverType("FAST");
 				// system.setSolverType("NORMAL");
 				system.setSolverType("ACCUMULATED");
-				system.setGravity( new Vector3D( 0, -9.8, 0, 0 ) );
-				
-				var ground = new jiglib.JPlane();
-				ground.set_y(-10);
-				ground.set_rotationX(90);
-				ground.set_movable(false);				
-				system.addBody( ground );
+				system.setGravity( new Vector3D( 0, -9.8*2, 0, 0 ) );
+								
 
 			}
 			
