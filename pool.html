@@ -15,7 +15,7 @@
 
 		<script type="text/javascript" src="Three.js"></script>	
 		<script type="text/javascript" src="RequestAnimationFrame.js"></script>
-		<script type="text/javascript" src="THREEx.jiglib.js"></script>
+		<script type="text/javascript" src="THREEx.jigliber.js"></script>
 
 
 <!-- TODO put all those library into a single js -->
@@ -138,7 +138,7 @@
 				projector = new THREE.Projector();
 
 				camera = new THREE.Camera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.z = 100;
+				camera.position.z = 70;
 				//camera.position.x = 50;
 				camera.position.y = 50;
 
@@ -165,7 +165,7 @@
 
 					scene.addObject( mesh );
 	
-					THREEx.jiglib.addMesh(system, mesh);
+					THREEx.jigliber.addMesh(system, mesh);
 					
 					return mesh;
 				}
@@ -182,14 +182,14 @@
 
 					scene.addObject( mesh );
 	
-					THREEx.jiglib.addMesh(system, mesh);
+					THREEx.jigliber.addMesh(system, mesh);
 					
 					return mesh;
 				}
 				
-				for ( var i = 0; i < 40; i ++ ) {
+				for ( var i = 0; i < 1; i ++ ) {
 
-					if (Math.random() > .5 ) {
+					if (Math.random() > .5 && false ) {
 
 						var width	= Math.random() * 4;
 						var height	= Math.random() * 4;
@@ -209,7 +209,7 @@
 				}
 
 				var planeW	= 150;
-				var planeD	= 100;
+				var planeD	= 75;
 				var planeY	= -10;
 				var tileW	= 5;
 				
@@ -222,8 +222,11 @@
 				scene.addObject( plane );
 
 				if( false ){
-					THREEx.jiglib.addMesh(system, plane);					
+					THREEx.jigliber.addMesh(system, plane);
+					plane.rigidBody.set_movable(false);
 				}else{
+					THREEx.jigliber._plane2Body(plane);
+					
 					var body = new jiglib.JPlane();
 					body.set_y(-10);
 					body.set_rotationX(90);
@@ -379,11 +382,11 @@
 			function init_jiglib() {
 
 				system = jiglib.PhysicsSystem.getInstance();
-				// system.setCollisionSystem(); // CollisionSystemBrite
+				//system.setCollisionSystem(); // CollisionSystemBrite
 				system.setCollisionSystem(true); // CollisionSystemGrid
-				// system.setSolverType("FAST");
-				// system.setSolverType("NORMAL");
-				system.setSolverType("ACCUMULATED");
+				system.setSolverType("FAST");
+				//system.setSolverType("NORMAL");
+				//system.setSolverType("ACCUMULATED");
 				system.setGravity( new Vector3D( 0, -9.8*2, 0, 0 ) );
 								
 
@@ -407,11 +410,18 @@
 
 			function JL2THREE(target, pos, dir) 
 			{
-				var position = new THREE.Matrix4();
+				var position	= new THREE.Matrix4();
 				position.setTranslation( pos[0], pos[1], pos[2]);
-				var rotate = new THREE.Matrix4(dir[0], dir[1], dir[2], dir[3], dir[4], dir[5], dir[6], dir[7], dir[8], dir[9], dir[10], dir[11], dir[12], dir[13], dir[14], dir[15]);
+
+				var rotate	= new THREE.Matrix4(
+					dir[0],  dir[1],  dir[2],  dir[3],
+					dir[4],  dir[5],  dir[6],  dir[7],
+					dir[8],  dir[9],  dir[10], dir[11],
+					dir[12], dir[13], dir[14], dir[15]
+				);
 				position.multiplySelf(rotate);
-				target.matrix = position;
+
+				target.matrix	= position;
 				target.update(false, true, camera);
 			}			
 
@@ -449,7 +459,7 @@
 						mesh.matrix = matrix;
 						mesh.update(false, true, camera);
 
-						
+	
 					}
 					
 					if (mesh.carBody) {
